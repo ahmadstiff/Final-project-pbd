@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost:3306
--- Generation Time: Jul 08, 2024 at 07:49 PM
--- Server version: 8.0.30
--- PHP Version: 8.3.8
+-- Host: 127.0.0.1
+-- Generation Time: Jul 12, 2024 at 02:08 PM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,7 +18,7 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `black_cinema`
+-- Database: `cinema1`
 --
 
 DELIMITER $$
@@ -40,9 +40,9 @@ DELIMITER ;
 --
 
 CREATE TABLE `advertisement` (
-  `id` int NOT NULL,
-  `links` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  `id` int(11) NOT NULL,
+  `links` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `advertisement`
@@ -60,11 +60,11 @@ INSERT INTO `advertisement` (`id`, `links`) VALUES
 --
 
 CREATE TABLE `chat` (
-  `chat_id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `chat_with` int NOT NULL,
-  `message` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+  `chat_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `chat_with` int(11) NOT NULL,
+  `message` text NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -89,10 +89,10 @@ INSERT INTO `chat` (`chat_id`, `user_id`, `chat_with`, `message`, `timestamp`) V
 --
 
 CREATE TABLE `favorites` (
-  `id` int NOT NULL,
-  `user_id` int NOT NULL,
-  `movie_id` int NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `movie_id` int(11) NOT NULL,
+  `created_at` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -109,20 +109,20 @@ INSERT INTO `favorites` (`id`, `user_id`, `movie_id`, `created_at`) VALUES
 --
 
 CREATE TABLE `movie` (
-  `id` int NOT NULL,
-  `userId` int NOT NULL,
-  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
-  `title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `overview` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
-  `poster_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `backdrop_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `genres` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
-  `category` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
-  `release_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `trailer` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `movieDuration` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `userId` int(11) NOT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  `title` varchar(255) DEFAULT NULL,
+  `overview` text DEFAULT NULL,
+  `poster_path` varchar(255) DEFAULT NULL,
+  `backdrop_path` varchar(255) DEFAULT NULL,
+  `genres` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `category` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `release_date` varchar(255) DEFAULT NULL,
+  `trailer` varchar(255) DEFAULT NULL,
+  `movieDuration` varchar(255) DEFAULT NULL,
   `vote_average` float DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `movie`
@@ -146,6 +146,31 @@ INSERT INTO `movie` (`id`, `userId`, `createdAt`, `title`, `overview`, `poster_p
 (715, 2, '2024-07-09 02:13:28', 'Avatar: The Deep Dive - A Special Edition of 20/20', 'An inside look at one of the most anticipated movie sequels ever with James Cameron and cast.', 'https://image.tmdb.org/t/p/w500//i367eMUXwj9LtNqrVlw1NXGRLx7.jpg', 'https://image.tmdb.org/t/p/w1280//eoAvHxfbaPOcfiQyjqypWIXWxDr.jpg', '[\"Documentary\"]', '[\"upcoming\"]', '2022-12-13', 'https://www.youtube.com/watch?v=P75e1iUawGY', '38', 7.103),
 (716, 2, '2024-07-09 02:13:50', 'Avatara Purusha: Part 1', 'When a son of an Ayurveda scholar goes missing, he blames his sister and cuts all ties with her. When the latter\\\'s daughter decides to set things right with a devious plan, there seems to be more trouble waiting for the family.', 'https://image.tmdb.org/t/p/w500//gQ29E9Qy6z5ExsxnpgUTHfpZFO3.jpg', 'https://image.tmdb.org/t/p/w1280//wEjFjWu5yiHk6U5YV9kSnwdWwNO.jpg', '[\"Thriller\",\" Fantasy\",\" Horror\"]', '[\"now playing\"]', '2022-05-06', '', '131', 5.3);
 
+--
+-- Triggers `movie`
+--
+DELIMITER $$
+CREATE TRIGGER `after_movie_insert` AFTER INSERT ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (movie_id, user_id, action)
+    VALUES (NEW.id, NEW.userId, 'INSERT');
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `movie_log`
+--
+
+CREATE TABLE `movie_log` (
+  `log_id` int(11) NOT NULL,
+  `movie_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `action` varchar(10) NOT NULL,
+  `action_time` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 -- --------------------------------------------------------
 
 --
@@ -153,24 +178,24 @@ INSERT INTO `movie` (`id`, `userId`, `createdAt`, `title`, `overview`, `poster_p
 --
 
 CREATE TABLE `payment` (
-  `id` int NOT NULL,
-  `userId` int DEFAULT NULL,
-  `movieId` int DEFAULT NULL,
-  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
-  `userName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `userEmail` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `movieId` int(11) DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  `userName` varchar(255) DEFAULT NULL,
+  `userEmail` varchar(255) DEFAULT NULL,
   `startTime` datetime DEFAULT NULL,
   `endTime` datetime DEFAULT NULL,
-  `feeAdmin` int DEFAULT NULL,
-  `price` int DEFAULT NULL,
-  `totalPrice` int DEFAULT NULL,
-  `packageName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `methodPayment` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `promoCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `feeAdmin` int(11) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL,
+  `totalPrice` int(11) DEFAULT NULL,
+  `packageName` varchar(255) DEFAULT NULL,
+  `methodPayment` varchar(255) DEFAULT NULL,
+  `promoCode` varchar(255) DEFAULT NULL,
+  `status` varchar(255) DEFAULT NULL,
   `expiredPayment` datetime DEFAULT NULL,
   `successPayment` datetime DEFAULT NULL,
-  `room` int DEFAULT NULL
+  `room` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -189,12 +214,12 @@ INSERT INTO `payment` (`id`, `userId`, `movieId`, `createdAt`, `userName`, `user
 --
 
 CREATE TABLE `payment_card` (
-  `id` int NOT NULL,
-  `numberCard` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `nameCard` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `imageCard` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `categoryInstitue` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `imageQR` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
+  `id` int(11) NOT NULL,
+  `numberCard` varchar(255) DEFAULT NULL,
+  `nameCard` varchar(255) DEFAULT NULL,
+  `imageCard` varchar(255) DEFAULT NULL,
+  `categoryInstitue` varchar(255) DEFAULT NULL,
+  `imageQR` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -213,11 +238,11 @@ INSERT INTO `payment_card` (`id`, `numberCard`, `nameCard`, `imageCard`, `catego
 --
 
 CREATE TABLE `payment_plan` (
-  `id` int NOT NULL,
-  `packageName` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `capacity` int DEFAULT NULL,
-  `screenResolution` int DEFAULT NULL,
-  `price` int DEFAULT NULL
+  `id` int(11) NOT NULL,
+  `packageName` varchar(255) DEFAULT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `screenResolution` int(11) DEFAULT NULL,
+  `price` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -235,10 +260,10 @@ INSERT INTO `payment_plan` (`id`, `packageName`, `capacity`, `screenResolution`,
 --
 
 CREATE TABLE `payment_promo` (
-  `id` int NOT NULL,
-  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
-  `promoCode` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `priceDisc` int DEFAULT NULL,
+  `id` int(11) NOT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  `promoCode` varchar(255) DEFAULT NULL,
+  `priceDisc` int(11) DEFAULT NULL,
   `usable` datetime DEFAULT NULL,
   `expired` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -258,16 +283,16 @@ INSERT INTO `payment_promo` (`id`, `createdAt`, `promoCode`, `priceDisc`, `usabl
 --
 
 CREATE TABLE `user` (
-  `user_id` int NOT NULL,
-  `user_username` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_id` int(11) NOT NULL,
+  `user_username` varchar(255) DEFAULT NULL,
+  `user_email` varchar(255) DEFAULT NULL,
+  `user_password` varchar(255) DEFAULT NULL,
   `emailVerified` datetime DEFAULT NULL,
-  `user_image` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_telepon` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `user_role` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updatedAt` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
+  `user_image` varchar(255) DEFAULT NULL,
+  `user_telepon` varchar(255) DEFAULT NULL,
+  `user_role` varchar(255) DEFAULT NULL,
+  `createdAt` datetime DEFAULT current_timestamp(),
+  `updatedAt` datetime DEFAULT NULL ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -278,6 +303,28 @@ INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `
 (1, 'a', 'a@gmail.com', '$2y$10$JQ7tC/.vzN9ThUr8x1tpO.EdJ9VljEKQwSF4InQIvhE5cSiQ3fkXq', NULL, 'https://example.com/default_image.jpg', NULL, 'admin', '2024-06-29 19:49:52', '2024-06-29 19:50:08'),
 (2, 'admin', 'as@gmail.com', '$2y$10$j1Mhkjh3QiRATUxYKonvtOdqKsr5reLUOhB/K.EhU0PGxhoiNb1WO', NULL, 'https://example.com/default_image.jpg', NULL, 'admin', '2024-06-30 14:47:15', '2024-07-09 01:36:32'),
 (3, 'Raku', 'wildannoob354@gmail.com', '$2y$10$Kfku74OZb9fTSnc8C6dKfORaA50lna9flcwfB.jtiLjXJxgMFE.pi', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08888888', 'user', '2024-06-30 14:55:23', '2024-07-09 02:36:44');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `user_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `user_view` (
+`user_id` int(11)
+,`user_username` varchar(255)
+,`user_email` varchar(255)
+,`createdAt` datetime
+);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `user_view`
+--
+DROP TABLE IF EXISTS `user_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_view`  AS SELECT `user`.`user_id` AS `user_id`, `user`.`user_username` AS `user_username`, `user`.`user_email` AS `user_email`, `user`.`createdAt` AS `createdAt` FROM `user` ;
 
 --
 -- Indexes for dumped tables
@@ -310,6 +357,12 @@ ALTER TABLE `favorites`
 ALTER TABLE `movie`
   ADD PRIMARY KEY (`id`),
   ADD KEY `userId` (`userId`);
+
+--
+-- Indexes for table `movie_log`
+--
+ALTER TABLE `movie_log`
+  ADD PRIMARY KEY (`log_id`);
 
 --
 -- Indexes for table `payment`
@@ -353,55 +406,61 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `advertisement`
 --
 ALTER TABLE `advertisement`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `chat`
 --
 ALTER TABLE `chat`
-  MODIFY `chat_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `movie`
 --
 ALTER TABLE `movie`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=717;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=717;
+
+--
+-- AUTO_INCREMENT for table `movie_log`
+--
+ALTER TABLE `movie_log`
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `payment_card`
 --
 ALTER TABLE `payment_card`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `payment_plan`
 --
 ALTER TABLE `payment_plan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `payment_promo`
 --
 ALTER TABLE `payment_promo`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- Constraints for dumped tables

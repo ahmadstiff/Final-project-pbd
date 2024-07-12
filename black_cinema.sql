@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 12, 2024 at 02:08 PM
+-- Generation Time: Jul 12, 2024 at 03:53 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -150,9 +150,44 @@ INSERT INTO `movie` (`id`, `userId`, `createdAt`, `title`, `overview`, `poster_p
 -- Triggers `movie`
 --
 DELIMITER $$
+CREATE TRIGGER `after_movie_delete` AFTER DELETE ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (id, userId, action, old_title)
+    VALUES (OLD.id, OLD.userId, 'AFTER DELETE', OLD.title);
+END
+$$
+DELIMITER ;
+DELIMITER $$
 CREATE TRIGGER `after_movie_insert` AFTER INSERT ON `movie` FOR EACH ROW BEGIN
     INSERT INTO movie_log (movie_id, user_id, action)
     VALUES (NEW.id, NEW.userId, 'INSERT');
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `after_movie_update` AFTER UPDATE ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (id, userId, action, old_title, new_title)
+    VALUES (NEW.id, NEW.userId, 'AFTER UPDATE', OLD.title, NEW.title);
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_movie_delete` BEFORE DELETE ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (id, action, old_title)
+    VALUES (OLD.id, 'BEFORE DELETE', OLD.title);
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_movie_insert` BEFORE INSERT ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (id, action, new_title)
+    VALUES (NEW.id, 'BEFORE INSERT', NEW.title);
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `before_movie_update` BEFORE UPDATE ON `movie` FOR EACH ROW BEGIN
+    INSERT INTO movie_log (id, action, old_title, new_title)
+    VALUES (OLD.id, 'BEFORE UPDATE', OLD.title, NEW.title);
 END
 $$
 DELIMITER ;
@@ -307,6 +342,31 @@ INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `user_basic_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `user_basic_view` (
+`user_id` int(11)
+,`user_username` varchar(255)
+,`user_email` varchar(255)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `user_detailed_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `user_detailed_view` (
+`user_id` int(11)
+,`user` varchar(255)
+,`email` varchar(255)
+,`full_info` text
+);
+
+-- --------------------------------------------------------
+
+--
 -- Stand-in structure for view `user_view`
 -- (See below for the actual view)
 --
@@ -316,6 +376,24 @@ CREATE TABLE `user_view` (
 ,`user_email` varchar(255)
 ,`createdAt` datetime
 );
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `user_basic_view`
+--
+DROP TABLE IF EXISTS `user_basic_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_basic_view`  AS SELECT `user`.`user_id` AS `user_id`, `user`.`user_username` AS `user_username`, `user`.`user_email` AS `user_email` FROM `user` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `user_detailed_view`
+--
+DROP TABLE IF EXISTS `user_detailed_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `user_detailed_view`  AS SELECT `user_basic_view`.`user_id` AS `user_id`, `user_basic_view`.`user_username` AS `user`, `user_basic_view`.`user_email` AS `email`, concat(`user_basic_view`.`user_username`,' <',`user_basic_view`.`user_email`,'>') AS `full_info` FROM `user_basic_view` ;
 
 -- --------------------------------------------------------
 

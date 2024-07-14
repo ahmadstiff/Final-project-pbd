@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jul 12, 2024 at 03:53 PM
+-- Generation Time: Jul 14, 2024 at 05:05 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -140,7 +140,7 @@ INSERT INTO `movie` (`id`, `userId`, `createdAt`, `title`, `overview`, `poster_p
 (709, 2, '2024-07-09 02:11:42', 'Jackie Chan Kung Fu Master', 'Jackie Chan is the undefeated Kung Fu Master who dishes out the action in traditional Jackie Chan style. When a young boy sets out to learn how to fight from the Master himself, he not only witnesses some spectacular fights, but learns some important life lessons along the way.', 'https://image.tmdb.org/t/p/w500//ds8xP7319zuPMa09kxzkIPBsHVL.jpg', 'https://image.tmdb.org/t/p/w1280//hGhUba7q5kqYA3TpgfCmzI9DNFk.jpg', '[\"Action\",\" Comedy\",\" Family\"]', '[\"now playing\"]', '2009-07-03', '', '85', 4.2),
 (710, 2, '2024-07-09 02:11:59', 'Motu Patlu: Kung Fu Kings', 'Tiger Chang, a martial arts master from a village located in the Himalayas, visits Furfuri Nagar. After defeating the boxers in a boxing competition, he insults the people of Furfuri Nagar. To restore the prestige of Furfuri Nagar, Motu decides to learn martial arts and defeat Tiger Chang. Can Motu overcome Tiger Chang\\\'s challenge and restore the pride of Furfuri Nagar? Watch to find out!', 'https://image.tmdb.org/t/p/w500//bWUyHbjGhgxstnZ2dxZrR721TVe.jpg', 'https://image.tmdb.org/t/p/w1280//gfBprn7If9ns3ARZyvo7qcu6gQ.jpg', '[\"Adventure\",\" Animation\",\" Comedy\"]', '[\"popular movies\"]', '2014-10-23', '', '96', 5.667),
 (711, 2, '2024-07-09 02:12:19', 'Half a Loaf of Kung Fu', 'A young daydreamer  assumes the identity of a dead martial arts hero and quickly finds himself caught up in a plot by several clans to steal famous martial arts artifacts being transported by an escort company.', 'https://image.tmdb.org/t/p/w500//h6UqBfxxCOeOUCryTLUO82qjnzu.jpg', 'https://image.tmdb.org/t/p/w1280//9LhDEiMxCsuJe2zGsd3l0yuUJwd.jpg', '[\"Comedy\",\" Action\"]', '[\"upcoming\"]', '1978-06-30', 'https://www.youtube.com/watch?v=vQgyu8JMsog', '97', 6.3),
-(712, 2, '2024-07-09 02:12:41', 'Avatar: The Way of Water', 'Set more than a decade after the events of the first film, learn the story of the Sully family (Jake, Neytiri, and their kids), the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.', 'https://image.tmdb.org/t/p/w500//t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', 'https://image.tmdb.org/t/p/w1280//8rpDcsfLJypbO6vREc0547VKqEv.jpg', '[\"Science Fiction\",\" Adventure\",\" Action\"]', '[\"popular movies\"]', '2022-12-14', 'https://www.youtube.com/watch?v=o5F8MOz_IDw', '192', 7.623),
+(712, 2, '2024-07-09 02:12:41', 'Avatar: The Way of Fire', 'Set more than a decade after the events of the first film, learn the story of the Sully family (Jake, Neytiri, and their kids), the trouble that follows them, the lengths they go to keep each other safe, the battles they fight to stay alive, and the tragedies they endure.', 'https://image.tmdb.org/t/p/w500//t6HIqrRAclMCA60NsSmeqe9RmNV.jpg', 'https://image.tmdb.org/t/p/w1280//8rpDcsfLJypbO6vREc0547VKqEv.jpg', '[\"Science Fiction\",\" Adventure\",\" Action\"]', '[\"popular movies\"]', '2022-12-14', 'https://www.youtube.com/watch?v=o5F8MOz_IDw', '192', 7.623),
 (713, 2, '2024-07-09 02:12:58', 'Avatar: Creating the World of Pandora', 'The Making-of James Cameron\\\'s Avatar. It shows interesting parts of the work on the set.', 'https://image.tmdb.org/t/p/w500//d9oqcfeCyc3zmMal6eJbfj3gatc.jpg', 'https://image.tmdb.org/t/p/w1280//uEwGFGtao9YG2JolmdvtHLLVbA9.jpg', '[\"Documentary\"]', '[\"top movies\"]', '2010-02-07', '', '23', 6.6),
 (714, 2, '2024-07-09 02:13:12', 'My Avatar and Me', 'is a creative documentary-fiction film and a film that might expand your sense of reality. It is the story about a man who enters the virtual world Second Life to pursue his personal dreams and ambitions. His journey into cyberspace becomes a magic learning experience, which gradually opens the gates to a much larger reality.', 'https://image.tmdb.org/t/p/w500//dZCj0jiOoDzAzbQM7ryYFEjkjs7.jpg', 'https://image.tmdb.org/t/p/w1280/null', '[\"Documentary\",\" Science Fiction\"]', '[\"top movies\"]', '2010-11-10', '', '', 6),
 (715, 2, '2024-07-09 02:13:28', 'Avatar: The Deep Dive - A Special Edition of 20/20', 'An inside look at one of the most anticipated movie sequels ever with James Cameron and cast.', 'https://image.tmdb.org/t/p/w500//i367eMUXwj9LtNqrVlw1NXGRLx7.jpg', 'https://image.tmdb.org/t/p/w1280//eoAvHxfbaPOcfiQyjqypWIXWxDr.jpg', '[\"Documentary\"]', '[\"upcoming\"]', '2022-12-13', 'https://www.youtube.com/watch?v=P75e1iUawGY', '38', 7.103),
@@ -158,7 +158,7 @@ $$
 DELIMITER ;
 DELIMITER $$
 CREATE TRIGGER `after_movie_insert` AFTER INSERT ON `movie` FOR EACH ROW BEGIN
-    INSERT INTO movie_log (movie_id, user_id, action)
+    INSERT INTO movie_log (id, user_id, action)
     VALUES (NEW.id, NEW.userId, 'INSERT');
 END
 $$
@@ -200,11 +200,25 @@ DELIMITER ;
 
 CREATE TABLE `movie_log` (
   `log_id` int(11) NOT NULL,
-  `movie_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `action` varchar(10) NOT NULL,
+  `id` int(11) DEFAULT NULL,
+  `userId` int(11) DEFAULT NULL,
+  `old_title` varchar(255) DEFAULT NULL,
+  `new_title` varchar(255) DEFAULT NULL,
+  `action` varchar(50) DEFAULT NULL,
   `action_time` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `movie_log`
+--
+
+INSERT INTO `movie_log` (`log_id`, `id`, `userId`, `old_title`, `new_title`, `action`, `action_time`) VALUES
+(3, NULL, NULL, NULL, 'Avatara Purusha: Part 2', 'BEFORE INSERT', '2024-07-13 02:37:36'),
+(4, 719, 2, NULL, NULL, 'INSERT', '2024-07-13 02:37:36'),
+(6, 712, NULL, 'Avatar: The Way of Water', 'Avatar: The Way of Fire', 'BEFORE UPDATE', '2024-07-13 02:47:22'),
+(7, 712, 2, 'Avatar: The Way of Water', 'Avatar: The Way of Fire', 'AFTER UPDATE', '2024-07-13 02:47:22'),
+(8, 719, NULL, 'Avatara Purusha: Part 2', NULL, 'BEFORE DELETE', '2024-07-13 02:50:30'),
+(9, 719, 2, 'Avatara Purusha: Part 2', NULL, 'AFTER DELETE', '2024-07-13 02:50:30');
 
 -- --------------------------------------------------------
 
@@ -502,13 +516,13 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `movie`
 --
 ALTER TABLE `movie`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=717;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=720;
 
 --
 -- AUTO_INCREMENT for table `movie_log`
 --
 ALTER TABLE `movie_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `payment`

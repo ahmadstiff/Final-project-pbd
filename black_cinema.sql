@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 14, 2024 at 04:56 AM
+-- Generation Time: Jul 14, 2024 at 12:31 PM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.8
 
@@ -309,7 +309,9 @@ CREATE TABLE `payment` (
 INSERT INTO `payment` (`id`, `userId`, `movieId`, `createdAt`, `userName`, `userEmail`, `startTime`, `endTime`, `feeAdmin`, `price`, `totalPrice`, `packageName`, `methodPayment`, `promoCode`, `status`, `expiredPayment`, `successPayment`, `room`) VALUES
 (42, 3, 700, '2024-07-08 19:33:08', 'palkon', 'wildannoob354@gmail.com', '2024-07-23 19:33:00', '2024-07-23 21:47:00', 5000, 1200000, 1205000, 'reguler', '', '', 'success', '2024-07-08 20:03:08', '2024-07-08 19:39:01', 1),
 (46, 3, 700, '2024-07-08 21:56:27', 'palkon', 'wildannoob354@gmail.com', '2024-07-08 21:56:00', '2024-07-09 00:10:00', 5000, 1200000, 1205000, 'reguler', '', '', 'success', '2024-07-08 22:26:27', '2024-07-08 21:58:38', 1),
-(47, 3, 700, '2024-07-08 22:04:31', 'palkon', 'wildannoob354@gmail.com', '2024-07-09 22:04:00', '2024-07-10 00:18:00', 5000, 1200000, 1205000, 'reguler', 'BRI', 'aaaa', 'canceled', '2024-07-08 22:34:31', '2024-07-08 22:13:00', 1);
+(47, 3, 700, '2024-07-08 22:04:31', 'palkon', 'wildannoob354@gmail.com', '2024-07-09 22:04:00', '2024-07-10 00:18:00', 5000, 1200000, 1205000, 'reguler', 'BRI', 'aaaa', 'canceled', '2024-07-08 22:34:31', '2024-07-08 22:13:00', 1),
+(58, 6, 700, '2024-07-14 12:52:50', 'ad', 'ad@gmail.com', '2024-07-15 12:52:00', '2024-07-15 15:06:00', 5000, 200000, 205000, 'VIP', 'shopee pay', '', 'success', '2024-07-14 13:22:50', '2024-07-14 12:53:40', 1),
+(59, 6, 702, '2024-07-14 12:54:20', 'ad', 'ad@gmail.com', '2024-07-22 12:54:00', '2024-07-22 14:28:00', 5000, 1200000, 1205000, 'reguler', 'Dana', '', 'success', '2024-07-14 13:24:20', '2024-07-14 12:54:54', 1);
 
 -- --------------------------------------------------------
 
@@ -333,7 +335,10 @@ CREATE TABLE `payment_card` (
 INSERT INTO `payment_card` (`id`, `numberCard`, `nameCard`, `imageCard`, `categoryInstitue`, `imageQR`) VALUES
 (1, '123434', 'BRI', 'https://cdn3.iconfinder.com/data/icons/banks-in-indonesia-logo-badge/100/BRI-512.png', 'ewallet', 'https://www.techopedia.com/wp-content/uploads/2023/03/aee977ce-f946-4451-8b9e-bba278ba5f13.png'),
 (2, '453564574', 'Dana', 'https://cdn.antaranews.com/cache/1200x800/2022/04/25/dana.jpg', 'ewallet', 'https://www.techopedia.com/wp-content/uploads/2023/03/aee977ce-f946-4451-8b9e-bba278ba5f13.png'),
-(3, '123', 'shopee pay', 'https://alfamart.co.id/storage/page/January2022/CNKpimFu30rDwGT22iJl.jpg', 'ewallet', 'https://alfamart.co.id/storage/page/January2022/CNKpimFu30rDwGT22iJl.jpg');
+(3, '123', 'shopee pay', 'https://alfamart.co.id/storage/page/January2022/CNKpimFu30rDwGT22iJl.jpg', 'ewallet', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936760/l8p4hczp98pwjinbm71o.png'),
+(5, '112298743', 'OVO', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936670/zmerlbmffxhbwpxhyy9k.png', 'ewallet', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936690/ln64dswy0v46frkxvsui.png'),
+(6, '99883364', 'Gopay', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936749/nn6dy11jwf0rzwayimml.webp', 'ewallet', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936760/l8p4hczp98pwjinbm71o.png'),
+(7, '696984', 'BCA', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936876/mxgtyuorhdqzyomzcxpu.jpg', 'bank', 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720936918/qabecpsx5h4q74vu7swm.png');
 
 -- --------------------------------------------------------
 
@@ -355,7 +360,10 @@ CREATE TABLE `payment_plan` (
 
 INSERT INTO `payment_plan` (`id`, `packageName`, `capacity`, `screenResolution`, `price`) VALUES
 (1, 'reguler', 23, 50, 1200000),
-(3, 'VIP', 8, 70, 200000);
+(3, 'VIP', 8, 70, 200000),
+(9, 'ber2', 2, 42, 120000),
+(11, 'party', 4, 48, 150000),
+(12, 'Main Bareng', 6, 50, 180000);
 
 -- --------------------------------------------------------
 
@@ -409,7 +417,7 @@ CREATE TABLE `user` (
 INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `emailVerified`, `user_image`, `user_telepon`, `user_role`, `createdAt`, `updatedAt`) VALUES
 (1, 'a', 'a@gmail.com', '$2y$10$JQ7tC/.vzN9ThUr8x1tpO.EdJ9VljEKQwSF4InQIvhE5cSiQ3fkXq', NULL, 'https://example.com/default_image.jpg', '08712865003', 'admin', '2024-06-29 19:49:52', '2024-07-14 11:34:31'),
 (2, 'admin', 'as@gmail.com', '$2y$10$j1Mhkjh3QiRATUxYKonvtOdqKsr5reLUOhB/K.EhU0PGxhoiNb1WO', NULL, 'https://example.com/default_image.jpg', '08531789225', 'admin', '2024-06-30 14:47:15', '2024-07-14 11:34:31'),
-(3, 'Raku', 'wildannoob354@gmail.com', '$2y$10$Kfku74OZb9fTSnc8C6dKfORaA50lna9flcwfB.jtiLjXJxgMFE.pi', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08520351146', 'user', '2024-06-30 14:55:23', '2024-07-14 11:34:31'),
+(3, 'Raku', 'wildannoob354@gmail.com', '$2y$10$Kfku74OZb9fTSnc8C6dKfORaA50lna9flcwfB.jtiLjXJxgMFE.pi', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '081234567890', 'user', '2024-06-30 14:55:23', '2024-07-14 16:22:10'),
 (6, 'ad', 'ad@gmail.com', '$2y$10$qoPkQS.Hh7A8RjL3FN.XUeBC55zjJkSSnNQ6caXo6YH32s/dWdOBG', NULL, 'https://www.mountsinai.on.ca/wellbeing/our-team/team-images/person-placeholder/image', '08006388089', 'user', '2024-07-14 11:21:44', '2024-07-14 11:34:31'),
 (109, 'Ahmad Alfarizi', 'ahmad.alfarizi@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08470887038', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
 (110, 'Ahmad Aroyanu Staifen', 'ahmad.staifen@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08335270953', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
@@ -444,9 +452,9 @@ INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `
 -- (See below for the actual view)
 --
 CREATE TABLE `user_basic_view` (
-`user_email` varchar(255)
-,`user_id` int
+`user_id` int
 ,`user_username` varchar(255)
+,`user_email` varchar(255)
 );
 
 -- --------------------------------------------------------
@@ -456,10 +464,10 @@ CREATE TABLE `user_basic_view` (
 -- (See below for the actual view)
 --
 CREATE TABLE `user_detailed_view` (
-`email` varchar(255)
-,`full_info` text
+`user_id` int
 ,`user` varchar(255)
-,`user_id` int
+,`email` varchar(255)
+,`full_info` text
 );
 
 -- --------------------------------------------------------
@@ -469,10 +477,10 @@ CREATE TABLE `user_detailed_view` (
 -- (See below for the actual view)
 --
 CREATE TABLE `user_view` (
-`createdAt` datetime
-,`user_email` varchar(255)
-,`user_id` int
+`user_id` int
 ,`user_username` varchar(255)
+,`user_email` varchar(255)
+,`createdAt` datetime
 );
 
 -- --------------------------------------------------------
@@ -613,19 +621,19 @@ ALTER TABLE `movie_log`
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
 
 --
 -- AUTO_INCREMENT for table `payment_card`
 --
 ALTER TABLE `payment_card`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `payment_plan`
 --
 ALTER TABLE `payment_plan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `user`

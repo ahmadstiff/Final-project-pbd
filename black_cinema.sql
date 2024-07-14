@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jul 14, 2024 at 05:05 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Host: localhost:3306
+-- Generation Time: Jul 14, 2024 at 04:56 AM
+-- Server version: 8.0.30
+-- PHP Version: 8.3.8
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,17 +18,62 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `cinema1`
+-- Database: `black_cinema`
 --
 
 DELIMITER $$
 --
 -- Procedures
 --
+CREATE DEFINER=`root`@`localhost` PROCEDURE `limit_users` ()   BEGIN
+    DECLARE user_count INT;
+
+    SELECT COUNT(*) INTO user_count FROM user;
+
+    IF user_count > 25 THEN
+        SELECT * FROM user
+        ORDER BY createdAt ASC
+        LIMIT 25;
+    ELSE
+
+        SELECT * FROM user
+        ORDER BY createdAt ASC;
+    END IF;
+END$$
+
 CREATE DEFINER=`root`@`localhost` PROCEDURE `update_pending_payments` ()   BEGIN
     UPDATE payment
     SET status = 'canceled'
     WHERE status = 'pending' AND expiredPayment <= NOW();
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `update_user_telephone` (IN `userId` INT, IN `newTelephone` VARCHAR(20))   BEGIN
+    DECLARE existingTelephone VARCHAR(20);
+
+    SELECT `user_telepon` INTO existingTelephone FROM user WHERE user_id = userId;
+
+    IF existingTelephone <> newTelephone THEN
+        UPDATE user
+        SET `user_telepon` = newTelephone
+        WHERE user_id = userId;
+    ELSE
+        SELECT 'Nomor telepon baru sama dengan nomor telepon yang ada' AS message;
+    END IF;
+END$$
+
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `count_movies` () RETURNS INT DETERMINISTIC BEGIN
+    DECLARE movie_count INT;
+    SELECT COUNT(*) INTO movie_count FROM movie;
+    RETURN movie_count;
+END$$
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `count_movies_by_years` (`start_year` INT, `end_year` INT) RETURNS INT DETERMINISTIC BEGIN
+    DECLARE movie_count INT;
+    SELECT COUNT(*) INTO movie_count FROM movie WHERE release_date BETWEEN start_year AND end_year;
+    RETURN movie_count;
 END$$
 
 DELIMITER ;
@@ -40,8 +85,8 @@ DELIMITER ;
 --
 
 CREATE TABLE `advertisement` (
-  `id` int(11) NOT NULL,
-  `links` varchar(255) NOT NULL
+  `id` int NOT NULL,
+  `links` varchar(255) COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -51,7 +96,9 @@ CREATE TABLE `advertisement` (
 INSERT INTO `advertisement` (`id`, `links`) VALUES
 (19, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467226/vq9viqp5dl3rm6s5qrjv.png'),
 (20, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467251/hmap9tcmqgxnwxiqytul.png'),
-(21, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467266/kpoo66studz66tnbzjey.png');
+(21, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467266/kpoo66studz66tnbzjey.png'),
+(22, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720704372/yirrccknm9xq3unelb98.png'),
+(23, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720704401/frv8aj7r9nimwm7lzwgi.png');
 
 -- --------------------------------------------------------
 
@@ -60,11 +107,11 @@ INSERT INTO `advertisement` (`id`, `links`) VALUES
 --
 
 CREATE TABLE `chat` (
-  `chat_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `chat_with` int(11) NOT NULL,
-  `message` text NOT NULL,
-  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+  `chat_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `chat_with` int NOT NULL,
+  `message` text COLLATE utf8mb4_general_ci NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -89,10 +136,10 @@ INSERT INTO `chat` (`chat_id`, `user_id`, `chat_with`, `message`, `timestamp`) V
 --
 
 CREATE TABLE `favorites` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `movie_id` int(11) NOT NULL,
-  `created_at` datetime DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `movie_id` int NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -100,7 +147,15 @@ CREATE TABLE `favorites` (
 --
 
 INSERT INTO `favorites` (`id`, `user_id`, `movie_id`, `created_at`) VALUES
-(18, 3, 702, '2024-07-09 02:36:57');
+(18, 3, 702, '2024-07-09 02:36:57'),
+(19, 6, 701, '2024-07-14 11:21:59'),
+(20, 6, 700, '2024-07-14 11:22:01'),
+(21, 6, 702, '2024-07-14 11:22:08'),
+(22, 6, 704, '2024-07-14 11:22:10'),
+(23, 6, 707, '2024-07-14 11:22:13'),
+(24, 6, 713, '2024-07-14 11:22:16'),
+(25, 6, 714, '2024-07-14 11:22:19'),
+(26, 6, 708, '2024-07-14 11:22:21');
 
 -- --------------------------------------------------------
 
@@ -109,18 +164,18 @@ INSERT INTO `favorites` (`id`, `user_id`, `movie_id`, `created_at`) VALUES
 --
 
 CREATE TABLE `movie` (
-  `id` int(11) NOT NULL,
-  `userId` int(11) NOT NULL,
-  `createdAt` datetime DEFAULT current_timestamp(),
-  `title` varchar(255) DEFAULT NULL,
-  `overview` text DEFAULT NULL,
-  `poster_path` varchar(255) DEFAULT NULL,
-  `backdrop_path` varchar(255) DEFAULT NULL,
-  `genres` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `category` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `release_date` varchar(255) DEFAULT NULL,
-  `trailer` varchar(255) DEFAULT NULL,
-  `movieDuration` varchar(255) DEFAULT NULL,
+  `id` int NOT NULL,
+  `userId` int NOT NULL,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
+  `title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `overview` text COLLATE utf8mb4_general_ci,
+  `poster_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `backdrop_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `genres` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `category` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `release_date` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `trailer` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `movieDuration` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `vote_average` float DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -199,13 +254,13 @@ DELIMITER ;
 --
 
 CREATE TABLE `movie_log` (
-  `log_id` int(11) NOT NULL,
-  `id` int(11) DEFAULT NULL,
-  `userId` int(11) DEFAULT NULL,
-  `old_title` varchar(255) DEFAULT NULL,
-  `new_title` varchar(255) DEFAULT NULL,
-  `action` varchar(50) DEFAULT NULL,
-  `action_time` timestamp NOT NULL DEFAULT current_timestamp()
+  `log_id` int NOT NULL,
+  `id` int DEFAULT NULL,
+  `userId` int DEFAULT NULL,
+  `old_title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `new_title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `action` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `action_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -227,24 +282,24 @@ INSERT INTO `movie_log` (`log_id`, `id`, `userId`, `old_title`, `new_title`, `ac
 --
 
 CREATE TABLE `payment` (
-  `id` int(11) NOT NULL,
-  `userId` int(11) DEFAULT NULL,
-  `movieId` int(11) DEFAULT NULL,
-  `createdAt` datetime DEFAULT current_timestamp(),
-  `userName` varchar(255) DEFAULT NULL,
-  `userEmail` varchar(255) DEFAULT NULL,
+  `id` int NOT NULL,
+  `userId` int DEFAULT NULL,
+  `movieId` int DEFAULT NULL,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
+  `userName` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `userEmail` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `startTime` datetime DEFAULT NULL,
   `endTime` datetime DEFAULT NULL,
-  `feeAdmin` int(11) DEFAULT NULL,
-  `price` int(11) DEFAULT NULL,
-  `totalPrice` int(11) DEFAULT NULL,
-  `packageName` varchar(255) DEFAULT NULL,
-  `methodPayment` varchar(255) DEFAULT NULL,
-  `promoCode` varchar(255) DEFAULT NULL,
-  `status` varchar(255) DEFAULT NULL,
+  `feeAdmin` int DEFAULT NULL,
+  `price` int DEFAULT NULL,
+  `totalPrice` int DEFAULT NULL,
+  `packageName` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `methodPayment` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `promoCode` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `expiredPayment` datetime DEFAULT NULL,
   `successPayment` datetime DEFAULT NULL,
-  `room` int(11) DEFAULT NULL
+  `room` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -263,12 +318,12 @@ INSERT INTO `payment` (`id`, `userId`, `movieId`, `createdAt`, `userName`, `user
 --
 
 CREATE TABLE `payment_card` (
-  `id` int(11) NOT NULL,
-  `numberCard` varchar(255) DEFAULT NULL,
-  `nameCard` varchar(255) DEFAULT NULL,
-  `imageCard` varchar(255) DEFAULT NULL,
-  `categoryInstitue` varchar(255) DEFAULT NULL,
-  `imageQR` varchar(255) DEFAULT NULL
+  `id` int NOT NULL,
+  `numberCard` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nameCard` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `imageCard` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `categoryInstitue` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `imageQR` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -287,11 +342,11 @@ INSERT INTO `payment_card` (`id`, `numberCard`, `nameCard`, `imageCard`, `catego
 --
 
 CREATE TABLE `payment_plan` (
-  `id` int(11) NOT NULL,
-  `packageName` varchar(255) DEFAULT NULL,
-  `capacity` int(11) DEFAULT NULL,
-  `screenResolution` int(11) DEFAULT NULL,
-  `price` int(11) DEFAULT NULL
+  `id` int NOT NULL,
+  `packageName` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `capacity` int DEFAULT NULL,
+  `screenResolution` int DEFAULT NULL,
+  `price` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -309,19 +364,22 @@ INSERT INTO `payment_plan` (`id`, `packageName`, `capacity`, `screenResolution`,
 --
 
 CREATE TABLE `payment_promo` (
-  `id` int(11) NOT NULL,
-  `createdAt` datetime DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
   `promoCode` varchar(255) DEFAULT NULL,
-  `priceDisc` int(11) DEFAULT NULL,
+  `priceDisc` int DEFAULT NULL,
   `usable` datetime DEFAULT NULL,
   `expired` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `payment_promo`
 --
 
 INSERT INTO `payment_promo` (`id`, `createdAt`, `promoCode`, `priceDisc`, `usable`, `expired`) VALUES
+(3, '2024-07-14 11:25:36', 'akhir bulan', 10000, '2024-07-20 11:25:00', '2024-07-31 11:25:00'),
+(4, '2024-07-14 11:26:30', 'agustusan', 15000, '2024-08-10 11:25:00', '2024-08-20 11:26:00'),
+(5, '2024-07-14 11:27:41', 'spesial kemerdekaan', 50000, '2024-07-17 00:01:00', '2024-07-18 23:59:00'),
 (1, '2024-07-08 22:28:46', 'boyah', 10, '2024-07-07 23:01:00', '2024-07-14 00:00:00'),
 (2, '2024-07-08 22:34:26', 'haha', 50000, '2024-07-07 00:01:00', '2024-07-14 00:00:00');
 
@@ -332,16 +390,16 @@ INSERT INTO `payment_promo` (`id`, `createdAt`, `promoCode`, `priceDisc`, `usabl
 --
 
 CREATE TABLE `user` (
-  `user_id` int(11) NOT NULL,
-  `user_username` varchar(255) DEFAULT NULL,
-  `user_email` varchar(255) DEFAULT NULL,
-  `user_password` varchar(255) DEFAULT NULL,
+  `user_id` int NOT NULL,
+  `user_username` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `emailVerified` datetime DEFAULT NULL,
-  `user_image` varchar(255) DEFAULT NULL,
-  `user_telepon` varchar(255) DEFAULT NULL,
-  `user_role` varchar(255) DEFAULT NULL,
-  `createdAt` datetime DEFAULT current_timestamp(),
-  `updatedAt` datetime DEFAULT NULL ON UPDATE current_timestamp()
+  `user_image` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_telepon` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_role` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `createdAt` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updatedAt` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -349,9 +407,35 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `emailVerified`, `user_image`, `user_telepon`, `user_role`, `createdAt`, `updatedAt`) VALUES
-(1, 'a', 'a@gmail.com', '$2y$10$JQ7tC/.vzN9ThUr8x1tpO.EdJ9VljEKQwSF4InQIvhE5cSiQ3fkXq', NULL, 'https://example.com/default_image.jpg', NULL, 'admin', '2024-06-29 19:49:52', '2024-06-29 19:50:08'),
-(2, 'admin', 'as@gmail.com', '$2y$10$j1Mhkjh3QiRATUxYKonvtOdqKsr5reLUOhB/K.EhU0PGxhoiNb1WO', NULL, 'https://example.com/default_image.jpg', NULL, 'admin', '2024-06-30 14:47:15', '2024-07-09 01:36:32'),
-(3, 'Raku', 'wildannoob354@gmail.com', '$2y$10$Kfku74OZb9fTSnc8C6dKfORaA50lna9flcwfB.jtiLjXJxgMFE.pi', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08888888', 'user', '2024-06-30 14:55:23', '2024-07-09 02:36:44');
+(1, 'a', 'a@gmail.com', '$2y$10$JQ7tC/.vzN9ThUr8x1tpO.EdJ9VljEKQwSF4InQIvhE5cSiQ3fkXq', NULL, 'https://example.com/default_image.jpg', '08712865003', 'admin', '2024-06-29 19:49:52', '2024-07-14 11:34:31'),
+(2, 'admin', 'as@gmail.com', '$2y$10$j1Mhkjh3QiRATUxYKonvtOdqKsr5reLUOhB/K.EhU0PGxhoiNb1WO', NULL, 'https://example.com/default_image.jpg', '08531789225', 'admin', '2024-06-30 14:47:15', '2024-07-14 11:34:31'),
+(3, 'Raku', 'wildannoob354@gmail.com', '$2y$10$Kfku74OZb9fTSnc8C6dKfORaA50lna9flcwfB.jtiLjXJxgMFE.pi', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08520351146', 'user', '2024-06-30 14:55:23', '2024-07-14 11:34:31'),
+(6, 'ad', 'ad@gmail.com', '$2y$10$qoPkQS.Hh7A8RjL3FN.XUeBC55zjJkSSnNQ6caXo6YH32s/dWdOBG', NULL, 'https://www.mountsinai.on.ca/wellbeing/our-team/team-images/person-placeholder/image', '08006388089', 'user', '2024-07-14 11:21:44', '2024-07-14 11:34:31'),
+(109, 'Ahmad Alfarizi', 'ahmad.alfarizi@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08470887038', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(110, 'Ahmad Aroyanu Staifen', 'ahmad.staifen@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08335270953', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(111, 'Alvin Hidayatulloh', 'alvin.hidayatulloh@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08263693684', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(112, 'Andika Faiz Mabrury', 'andika.mabrury@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08312655589', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(113, 'Ardan Satria Wicaksana', 'ardan.wicaksana@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08772196927', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(114, 'Bintang Jannata Royan', 'bintang.royan@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08923017900', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(115, 'Boga Raditya Dwika Bratha', 'boga.bratha@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08298498749', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(116, 'Dimas Amar Maulana', 'dimas.maulana@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08723440075', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(117, 'Dimas Tanjung Mauluddin', 'dimas.mauluddin@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08721704158', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(118, 'Duta Dian Irawan', 'duta.irawan@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08438200598', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(119, 'Fajar Brillian Muhammad Asfar', 'fajar.asfar@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08025890549', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(120, 'Fandra Dzaky Fahiqha', 'fandra.fahiqha@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08814850982', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(121, 'Hangga Katon Dewantoro', 'hangga.dewantoro@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08996583292', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(122, 'Irsyah Fahri Maulana', 'irsyah.maulana@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08538363545', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(123, 'Khabbaba Marufa', 'khabbaba.marufa@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08702067882', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(124, 'M.R Dharma Yudho', 'm.r.yudho@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08895248806', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(125, 'Manik Nur Hadi', 'manik.hadi@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08370040413', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(126, 'Muhamad Anjas Setiawan', 'muhamad.setiawan@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08164455679', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(127, 'Muhammad Asad Catur Nasrulah', 'muhammad.nasrulah@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08712157187', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(128, 'Muhammad Emir Al Hafidz', 'muhammad.hafidz@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08067418931', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(129, 'Muhammad Faiz Nugraha', 'muhammad.nugraha@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08200623123', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(130, 'Muhammad Wildanu Staifen', 'muhammad.staifen@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08800858853', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(131, 'Naufal Haidar Jawad', 'naufal.jawad@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08402424927', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(132, 'Rheno Dyasando Abdanudin', 'rheno.abdanudin@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08609548107', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31'),
+(133, 'Wahyu Purbo Yuwono', 'wahyu.yuwono@gmail.com', '$2y$10$LvMwUMLilZE.jR9eIEWySO5eM0/1bZjE/UZjekxJUMpjxEMBQAZtG', NULL, 'https://res.cloudinary.com/dv3z889zh/image/upload/v1720467401/xdkdp60s2qbqup9pxytm.png', '08840465785', 'user', '2024-07-11 19:52:48', '2024-07-14 11:34:31');
 
 -- --------------------------------------------------------
 
@@ -360,9 +444,9 @@ INSERT INTO `user` (`user_id`, `user_username`, `user_email`, `user_password`, `
 -- (See below for the actual view)
 --
 CREATE TABLE `user_basic_view` (
-`user_id` int(11)
+`user_email` varchar(255)
+,`user_id` int
 ,`user_username` varchar(255)
-,`user_email` varchar(255)
 );
 
 -- --------------------------------------------------------
@@ -372,10 +456,10 @@ CREATE TABLE `user_basic_view` (
 -- (See below for the actual view)
 --
 CREATE TABLE `user_detailed_view` (
-`user_id` int(11)
-,`user` varchar(255)
-,`email` varchar(255)
+`email` varchar(255)
 ,`full_info` text
+,`user` varchar(255)
+,`user_id` int
 );
 
 -- --------------------------------------------------------
@@ -385,10 +469,10 @@ CREATE TABLE `user_detailed_view` (
 -- (See below for the actual view)
 --
 CREATE TABLE `user_view` (
-`user_id` int(11)
-,`user_username` varchar(255)
+`createdAt` datetime
 ,`user_email` varchar(255)
-,`createdAt` datetime
+,`user_id` int
+,`user_username` varchar(255)
 );
 
 -- --------------------------------------------------------
@@ -448,7 +532,8 @@ ALTER TABLE `favorites`
 --
 ALTER TABLE `movie`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `userId` (`userId`);
+  ADD KEY `userId` (`userId`),
+  ADD KEY `idx_movie_title` (`title`);
 
 --
 -- Indexes for table `movie_log`
@@ -480,7 +565,6 @@ ALTER TABLE `payment_plan`
 -- Indexes for table `payment_promo`
 --
 ALTER TABLE `payment_promo`
-  ADD PRIMARY KEY (`id`),
   ADD KEY `idx_promoCode` (`promoCode`);
 
 --
@@ -488,7 +572,8 @@ ALTER TABLE `payment_promo`
 --
 ALTER TABLE `user`
   ADD PRIMARY KEY (`user_id`),
-  ADD UNIQUE KEY `email` (`user_email`);
+  ADD UNIQUE KEY `email` (`user_email`),
+  ADD KEY `idx_user_id_username` (`user_id`,`user_username`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -498,61 +583,55 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `advertisement`
 --
 ALTER TABLE `advertisement`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `chat`
 --
 ALTER TABLE `chat`
-  MODIFY `chat_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `chat_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `favorites`
 --
 ALTER TABLE `favorites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `movie`
 --
 ALTER TABLE `movie`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=720;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=720;
 
 --
 -- AUTO_INCREMENT for table `movie_log`
 --
 ALTER TABLE `movie_log`
-  MODIFY `log_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `log_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=58;
 
 --
 -- AUTO_INCREMENT for table `payment_card`
 --
 ALTER TABLE `payment_card`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `payment_plan`
 --
 ALTER TABLE `payment_plan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
--- AUTO_INCREMENT for table `payment_promo`
---
-ALTER TABLE `payment_promo`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `user_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=134;
 
 --
 -- Constraints for dumped tables
